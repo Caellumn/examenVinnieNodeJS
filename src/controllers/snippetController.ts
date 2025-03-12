@@ -20,8 +20,7 @@ export const getSnippets = async (req: Request, res: Response) => {
       res.status(200).json(filteredSnippets);
       return;
     }
-    //filter on multiple tags and case insenstive separated by comma for example http://localhost:3000/api/snippets/?tags=backend,test
-   //create an array to join the tags and put them back in an array
+    //filter on tags
    if(req.query.tags){
     const tags = (req.query.tags as string).split(",").map((tag) => tag.trim());
     const filteredSnippets = snippets.filter((snippet) => snippet.tags?.some((tag) => tags.includes(tag)));
@@ -29,8 +28,19 @@ export const getSnippets = async (req: Request, res: Response) => {
     return;
    }
 
-    //return all snippets
-    res.status(200).json(snippets);
+   // pagination with ?page and ?limit
+   if(req.query.page || req.query.limit){
+   const page = parseInt(req.query.page as string) || 1;
+   const limit = parseInt(req.query.limit as string) || 10;
+   const startIndex = (page - 1) * limit;
+   const endIndex = page * limit;
+   const paginatedSnippets = snippets.slice(startIndex, endIndex);
+   res.status(200).json(paginatedSnippets);
+   return;
+  }
+
+  res.status(200).json(snippets);
+
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });
