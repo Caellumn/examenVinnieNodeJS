@@ -13,6 +13,23 @@ export const getSnippets = async (req: Request, res: Response) => {
     snippets.forEach((snippets) => {
       snippets.code = Buffer.from(snippets.code, "base64").toString("utf-8");
     });
+    //filter on language
+    if(req.query.language){
+      const language = (req.query.language as string).split(",").map((language) => language.trim());
+      const filteredSnippets = snippets.filter((snippet) => language.includes(snippet.language));
+      res.status(200).json(filteredSnippets);
+      return;
+    }
+    //filter on multiple tags and case insenstive separated by comma for example http://localhost:3000/api/snippets/?tags=backend,test
+   //create an array to join the tags and put them back in an array
+   if(req.query.tags){
+    const tags = (req.query.tags as string).split(",").map((tag) => tag.trim());
+    const filteredSnippets = snippets.filter((snippet) => snippet.tags?.some((tag) => tags.includes(tag)));
+    res.status(200).json(filteredSnippets);
+    return;
+   }
+
+    //return all snippets
     res.status(200).json(snippets);
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -23,11 +40,15 @@ export const getSnippets = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getSnippetById = async(req: Request, res: Response) =>{
 try{
   const {id} = req.params;
   const snippet = await Snippet.findById(id);
+  if (!snippet) {
+   res.status(404).json({ message: "Snippet not found" });
+   return;
+  }
+  snippet.code = Buffer.from(snippet.code, "base64").toString("utf-8");
   res.status(200).json(snippet);
 } catch (error: unknown) {
   if (error instanceof Error) {
