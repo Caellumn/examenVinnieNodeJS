@@ -23,7 +23,7 @@ const snippetSchema = new mongoose.Schema(
     },
     expiresIn:{
       type:Number,
-      optional:true
+      required:false
     }
   },
   {

@@ -11,7 +11,7 @@ const router = express.Router();
 router
   .get("/snippets", getSnippets)
   .post("/snippets", addSnippet)
-  .patch("/snippets/:id", updateSnippet)
+  .put("/snippets/:id", updateSnippet)
   .get("/snippets/:id",getSnippetById)
 
 export default router;

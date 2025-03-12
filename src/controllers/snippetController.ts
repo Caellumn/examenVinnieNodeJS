@@ -36,6 +36,10 @@ try{
 export const addSnippet = async (req: Request, res: Response) => {
   try {
     const { title, code, language, tags } = req.body;
+    if(req.body.expiresIn){
+      const snippet = await Snippet.create({ title, code, language, tags, expiresIn: req.body.expiresIn });
+      res.status(201).json(snippet);
+    }
     const snippet = await Snippet.create({ title, code, language, tags });
     res.status(201).json(snippet);
   } catch (error: unknown) {
@@ -48,6 +52,7 @@ export const addSnippet = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const updateSnippet = async (req: Request, res: Response) => {
   try {
