@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Snippet } from "../models/snippetModel";
 import { Error as MongooseError } from "mongoose";
+import { msToSeconds, secondsToMs, replaceQuotes } from "../utils/helpers";
 const { ValidationError } = MongooseError;
 
 
@@ -36,12 +37,13 @@ try{
 export const addSnippet = async (req: Request, res: Response) => {
   try {
     const { title, code, language, tags } = req.body;
-    if(req.body.expiresIn){
-      const snippet = await Snippet.create({ title, code, language, tags, expiresIn: req.body.expiresIn });
+    const expiresIn=req.body.expiresIn;
+    if(expiresIn){
+      const snippet = await Snippet.create({ title, code, language, tags, expiresIn: msToSeconds(expiresIn) })
       res.status(201).json(snippet);
-    }
+    }else{
     const snippet = await Snippet.create({ title, code, language, tags });
-    res.status(201).json(snippet);
+    res.status(201).json(snippet);}
   } catch (error: unknown) {
     if (error instanceof ValidationError) {
       res.status(400).json({ message: error.message });
