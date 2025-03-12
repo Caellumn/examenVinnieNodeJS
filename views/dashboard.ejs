@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Snippets Dashboard</title>
+<style>
+    body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+select, input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+tr:hover {
+    background-color: #e3f2fd;
+}
+
+pre {
+    background-color:black;
+    padding: 10px;
+    border-radius: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color:white;
+}
+
+.tag {
+    display: inline-block;
+    background-color: #e0f7fa;
+    color: #00838f;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.language-badge {
+    display: inline-block;
+    background-color: #4a148c;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.no-snippets {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Snippets Dashboard</h1>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="language-filter">Filter by Language:</label>
+                <select id="language-filter">
+                    <option value="">All Languages</option>
+                    <% 
+                    // Extract unique languages
+                    const languages = [...new Set(snippets.map(snippet => snippet.language))];
+                    languages.forEach(language => { 
+                    %>
+                        <option value="<%= language %>"><%= language %></option>
+                    <% }); %>
+                </select>
+                
+                <button id="apply-language-filter">Apply</button>
+            </div>
+            
+            <div class="filter-group">
+                <label for="tag-filter">Filter by Tag:</label>
+                <input type="text" id="tag-filter" placeholder="Enter tag(s), comma separated">
+                <button id="apply-tag-filter">Apply</button>
+            </div>
+        </div>
+        
+        <table id="snippets-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Code</th>
+                    <th>Language</th>
+                    <th>Tags</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (snippets && snippets.length > 0) { %>
+                    <% snippets.forEach(snippet => { %>
+                        <tr>
+                            <td><%= snippet.title %></td>
+                            <td>
+                                <pre><%= snippet.code %></pre>
+                            </td>
+                            <td>
+                                <span class="language-badge"><%= snippet.language %></span>
+                            </td>
+                            <td>
+                                <% if (snippet.tags && snippet.tags.length > 0) { %>
+                                    <% snippet.tags.forEach(tag => { %>
+                                        <span class="tag"><%= tag %></span>
+                                    <% }); %>
+                                <% } else { %>
+                                    <span>No tags</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4" class="no-snippets">No snippets found</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle language filter
+            document.getElementById('apply-language-filter').addEventListener('click', function() {
+                const language = document.getElementById('language-filter').value;
+                if (language) {
+                    window.location.href = `/dashboard?language=${language}`;
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            });
+            
+            // Handle tag filter
+            document.getElementById('apply-tag-filter').addEventListener('click', function() {
+                const tags = document.getElementById('tag-filter').value;
+                if (tags) {
+                    window.location.href = `/dashboard?tags=${tags}`;
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
