@@ -101,8 +101,11 @@ export const addSnippet = async (req: Request, res: Response) => {
   try {
     const { title, code, language, tags } = req.body;
     const expiresIn=req.body.expiresIn;
-        // Encode
-const encodedCode = Buffer.from(code).toString("base64");
+
+    //change the double quotes to single quotes in code
+    const singleCode = replaceQuotes(code);
+    // Encode
+const encodedCode = Buffer.from(singleCode).toString("base64");
     if(expiresIn){
       const snippet = await Snippet.create({ title, code:encodedCode, language, tags, expiresIn: msToSeconds(expiresIn) })
   

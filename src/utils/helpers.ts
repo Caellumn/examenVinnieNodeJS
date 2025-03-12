@@ -3,7 +3,7 @@ export const msToSeconds = (ms: number) => {
   const seconds = Math.floor(ms / 1000);
   return seconds;
  
-};
+};  
 
 // a function to change seconds in a string to miliseconds in other words reverse msToSeconds
 export const secondsToMs = (seconds: number) => {
@@ -29,6 +29,14 @@ export const isExpired = (expiresIn: number) => {
   return expiresAt < now;
 };
 
+// a function to check transform the updatedAt into miliseconds
+export const updatedAtToMs = (updatedAt: Date) => {
+  const ms = updatedAt.getTime();
+  return ms;
+};
 
-
-
+// a function to transform ISO date string to milliseconds
+export const isoStringToMs = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.getTime();
+};
