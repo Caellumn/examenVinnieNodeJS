@@ -38,15 +38,21 @@ export const getSnippets = async (req: Request, res: Response) => {
    res.status(200).json(paginatedSnippets);
    return;
   }
-  //check for each snippet if it is expired
-  const filteredSnippets = snippets.filter((snippet) => {
-    // If expiresIn is not set, consider the snippet as not expired
+  
+  const nonExpiredSnippets = snippets.filter((snippet) => {
+    
     if (!snippet.expiresIn) {
       return true;
     }
+    
+    const updatedAtTimestamp = new Date(snippet.updatedAt).getTime();
+    const expirationTime = updatedAtTimestamp + (snippet.expiresIn * 1000);
+    const currentTime = Date.now();
+    
+    return currentTime <= expirationTime;
   });
  
-  res.status(200).json(filteredSnippets);
+  res.status(200).json(nonExpiredSnippets);
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });
@@ -66,22 +72,18 @@ try{
   }
   snippet.code = Buffer.from(snippet.code, "base64").toString("utf-8");
 
-  //check if the snippit has expiresin
+ 
   if(!snippet.expiresIn){
     res.status(200).json(snippet);
     return;
   }
-  // //check if the snippet is expired
-  //  if(isExpired(snippet.expiresIn) ===true){
-  //   res.status(400).json({ message: "Snippet is expired" });
-  //   return;
-  //  }
-
-  const isSnippetExpired = isExpired(snippet.expiresIn);
-  console.log(isSnippetExpired);
-
-  if(!isSnippetExpired === true){
-    res.status(400).json({ message: "Snippet is expired" });
+  
+  const updatedAtTimestamp = new Date(snippet.updatedAt).getTime();
+  const expirationTime = updatedAtTimestamp + (snippet.expiresIn * 1000);
+  const currentTime = Date.now();
+  
+  if(currentTime > expirationTime) {
+    res.status(410).json({ message: "This snippet has expired" });
     return;
   }
 
@@ -158,4 +160,3 @@ export const deleteSnippet = async (req: Request, res: Response) => {
     }
   }
 };
-
