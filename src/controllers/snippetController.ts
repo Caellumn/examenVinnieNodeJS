@@ -9,6 +9,10 @@ const { ValidationError } = MongooseError;
 export const getSnippets = async (req: Request, res: Response) => {
   try {
     const snippets = await Snippet.find().select('+expiresIn');
+    //decode the "code" from each snippets in the response
+    snippets.forEach((snippets) => {
+      snippets.code = Buffer.from(snippets.code, "base64").toString("utf-8");
+    });
     res.status(200).json(snippets);
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -38,11 +42,14 @@ export const addSnippet = async (req: Request, res: Response) => {
   try {
     const { title, code, language, tags } = req.body;
     const expiresIn=req.body.expiresIn;
+        // Encode
+const encodedCode = Buffer.from(code).toString("base64");
     if(expiresIn){
-      const snippet = await Snippet.create({ title, code, language, tags, expiresIn: msToSeconds(expiresIn) })
-      res.status(201).json(snippet);
+      const snippet = await Snippet.create({ title, code:encodedCode, language, tags, expiresIn: msToSeconds(expiresIn) })
+  
+      res.status(201).json({ snippet});
     }else{
-    const snippet = await Snippet.create({ title, code, language, tags });
+    const snippet = await Snippet.create({ title, code:encodedCode, language, tags });
     res.status(201).json(snippet);}
   } catch (error: unknown) {
     if (error instanceof ValidationError) {
