@@ -16,6 +16,19 @@ export const replaceQuotes = (str: string) => {
   return str.replace(/"/g, "'");
 };
 
+// a function to check the current time
+export const checkTime = () => {
+  const now = new Date();
+  return now;
+};
+
+// a function to check if the snippet is expired
+export const isExpired = (expiresIn: number) => {
+  const now = checkTime();
+  const expiresAt = new Date(now.getTime() + expiresIn * 1000);
+  return expiresAt < now;
+};
+
 
 
 

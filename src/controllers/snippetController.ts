@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Snippet } from "../models/snippetModel";
 import { Error as MongooseError } from "mongoose";
-import { msToSeconds, secondsToMs, replaceQuotes } from "../utils/helpers";
+import { msToSeconds, secondsToMs, replaceQuotes, checkTime, isExpired } from "../utils/helpers";
 const { ValidationError } = MongooseError;
 
 
@@ -38,9 +38,15 @@ export const getSnippets = async (req: Request, res: Response) => {
    res.status(200).json(paginatedSnippets);
    return;
   }
-
-  res.status(200).json(snippets);
-
+  //check for each snippet if it is expired
+  const filteredSnippets = snippets.filter((snippet) => {
+    // If expiresIn is not set, consider the snippet as not expired
+    if (!snippet.expiresIn) {
+      return true;
+    }
+  });
+ 
+  res.status(200).json(filteredSnippets);
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });
@@ -59,9 +65,29 @@ try{
    return;
   }
   snippet.code = Buffer.from(snippet.code, "base64").toString("utf-8");
+
+  //check if the snippit has expiresin
+  if(!snippet.expiresIn){
+    res.status(200).json(snippet);
+    return;
+  }
+  // //check if the snippet is expired
+  //  if(isExpired(snippet.expiresIn) ===true){
+  //   res.status(400).json({ message: "Snippet is expired" });
+  //   return;
+  //  }
+
+  const isSnippetExpired = isExpired(snippet.expiresIn);
+  console.log(isSnippetExpired);
+
+  if(!isSnippetExpired === true){
+    res.status(400).json({ message: "Snippet is expired" });
+    return;
+  }
+
   res.status(200).json(snippet);
 } catch (error: unknown) {
-  if (error instanceof Error) {
+  if (error instanceof Error) { 
     res.status(500).json({ message: error.message });
   } else {
     res.status(500).json({ message: "Something went wrong" });
@@ -114,3 +140,22 @@ export const updateSnippet = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const deleteSnippet = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const snippet = await Snippet.findByIdAndDelete(id);
+    if (!snippet) {
+      res.status(404).json({ message: "Snippet not found try again" });
+      return;
+    }
+    res.status(200).json({ message: "Snippet deleted successfully" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  }
+};
+
